@@ -7,6 +7,10 @@ G. Serdyuk <gena@analograils.com>
 
 2. Installation
 ---------------
+>cp * gnucap
+we assume that this directory is located under gnucap (as it refers to gnucap)
+
+>cd BSIM3v330.lut
 >make
 
 this will clreate two libraries - bsim330.so and bsim330.lut.so
