@@ -1,0 +1,56 @@
+BSIM with Look-Up Table (LUT)
+G. Serdyuk <gena@analograils.com>
+ 
+1. Intro
+--------
+[tbd]
+
+2. Installation
+---------------
+>make
+
+this will clreate two libraries - bsim330.so and bsim330.lut.so
+bsim330.so - usual bsim model, no changes
+bsim330.lut.so - models which supports LUT
+
+just attach them to gnucap as usual (-a or .attach)
+
+3. Usage
+--------
+
+model supports 9 new parameters
+vgsmin, vgsmax, vgsnum
+vdsmin, vdsmax, vdsnum
+vbsmin, vbsmax, vbsnum
+
+that arecorrespondently minimum and maximum expected voltages 
+and number of points between them.
+defaults are: -5, +5 and 20.
+
+Reasonable (from convergencve point of view) are 
+vgsmin, vgsmax, vgsnum  =  -5 +5 50
+vdsmin, vdsmax, vdsnum  =  -5 +5 50
+vbsmin, vbsmax, vbsnum  =  -5 +5 10
+
+If actual voltage will go out of vxxmin..vxxmax range, full BSIM 
+calculation will be performed
+
+Device support 1 new parameter:
+lut_mode = 0 1 or 2
+
+0 - full BSIM model
+1 - BSIM model w/o change calculation
+3 - LUT used
+
+4. ToDO
+-------
+
+1) clean up code and makefile
+2) finish test cases
+    - tran
+    - dc
+    - time comparison
+3) combine multiple LUTs for same devices
+4) write doc
+5) optimize time
+6) check derivatives  
