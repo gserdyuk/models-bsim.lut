@@ -1,9 +1,0 @@
-#!/bin/bash
-
-GNUCAP=./gnucap
-
-NAMES="comprt.gckt2 "
-for name in $NAMES; do
-$GNUCAP -a ./bsim330.lut.so   -b $name |tee $name.bsim330.lut2
-done
-

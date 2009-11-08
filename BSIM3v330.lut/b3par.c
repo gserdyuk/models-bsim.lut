@@ -26,7 +26,6 @@ GENinstance *inst;
 IFvalue *select;
 {
     BSIM3instance *here = (BSIM3instance*)inst;
-    fprintf(stdout, "BSIM3param entered \n");
     switch(param) 
     {   case BSIM3_W:
             here->BSIM3w = value->rValue;

@@ -45,8 +45,6 @@ CKTnode *tmp;
 
 double tmp1, tmp2;
 
-    /* fprintf(stderr,"  ## BSIM3setup entered\n"); */
-    /*  loop through all the BSIM3 device models */
     for( ; model != NULL; model = model->BSIM3nextModel )
     {
 /* Default value Processing for BSIM3 MOSFET Models */
@@ -999,13 +997,11 @@ if((here->ptr = SMPmakeElt(matrix,here->first,here->second))==(double *)NULL){\
             TSTALLOC(BSIM3BqPtr, BSIM3bNode, BSIM3qNode)
             /* fprintf(stderr,"  ## -- setup ## point1\n"); */
 #ifdef LUT
-            fprintf(stdout,"BSIM3set allocating  lutptr %d\n", here->lutptr);
             if (here->lutptr == NULL) 
                 here->lutptr=malloc(sizeof (LUT3D_rr)); 
             here->lut_inited=0; /* FALSE */
             if (!here->BSIM3lut_modeGiven)
                 here->BSIM3lut_mode=0;   /* no lut by default */
-            fprintf(stdout,"BSIM3set here->BSIM3lut_mode=%d \n",here->BSIM3lut_mode);
 #endif /*LUT*/
         }
     }

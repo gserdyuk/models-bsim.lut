@@ -4,9 +4,10 @@ PREFIX = /usr/local/gnucap
 INSTALL_DIR = $(PREFIX)/lib/models/bsim
 SPICE_INCLUDE = ../Include
 GNUCAP_INCLUDE = ../Gnucap
-VPATH = .:$(SPICE_INCLUDE):$(GNUCAP_INCLUDE)
+LUT_INCLUDE = ../common
+VPATH = .:$(SPICE_INCLUDE):$(GNUCAP_INCLUDE):$(LUT_INCLUDE)
 
-C_SRCS = $(CFILES) devsup.c
+C_SRCS = $(CFILES) devsup.c LUT_rr.c
 CC_SRCS = spice-wrapper.cc
 
 OBJS = ${CC_SRCS:.cc=.o} ${C_SRCS:.c=.o}
@@ -14,8 +15,8 @@ OBJS = ${CC_SRCS:.cc=.o} ${C_SRCS:.c=.o}
 CC = gcc
 CCC = g++
 
-CFLAGS = -O2 -g -I. -I$(SPICE_INCLUDE) -DTRACE_UNTESTED -D$(SPICE_VERSION) \
- -DPREDICTOR -DHAS_STDLIB -fPIC
+CFLAGS = -O2 -g -I. -I$(SPICE_INCLUDE) -I$(LUT_INCLUDE) -DTRACE_UNTESTED -D$(SPICE_VERSION) \
+ -DPREDICTOR -DHAS_STDLIB -fPIC -DLUT
 
 CCFLAGS = $(CFLAGS) -I$(GNUCAP_INCLUDE) -Wall -Wextra 
 
