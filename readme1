@@ -7,15 +7,21 @@ G. Serdyuk <gena@analograils.com>
 
 2. Installation
 ---------------
->cp * gnucap
-we assume that this directory is located under gnucap root directory 
+- put models-bsim.lut directory below gnucap
 gnucap
     src
     ...
     models-bsim.lut
+- cd BSIM3v330.lut
+- make
 
->cd BSIM3v330.lut
->make -f Makefile.work
+bsim330.lut.so  library will be created. Use it as usual
+
+2.1.Developers version
+---------------------
+- put models-bsim.lut directory below gnucap
+- cd BSIM3v330.lut
+- make -f Makefile.work
 
 this will clreate two libraries - bsim330.so and bsim330.lut.so
 bsim330.so - usual bsim model, no changes
@@ -61,8 +67,12 @@ lut_mode = 0 1 or 2
    
 2) finish test cases
     - tran
+	+ comprt
+	...
     - dc
+	...
     - time comparison
+	...
 3) combine multiple LUTs for same devices
 4) write doc
 5) optimize time
