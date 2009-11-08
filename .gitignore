@@ -1,2 +1,6 @@
 *.o
 *.so
+gnucap
+Gnucap
+b3v3check.log
+*.gckt.out

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+GNUCAP=./gnucap
+BSIM330=./bsim330.lut.so
+
+
+NAMES="comprt-l1.gckt "
+for name in $NAMES; do
+echo $name
+$GNUCAP -a $BSIM330  -b $name |tee $name.out
+done
+
