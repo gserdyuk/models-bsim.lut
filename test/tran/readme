@@ -5,7 +5,9 @@ Comparator
 taken from http://www-device.eecs.berkeley.edu/~bsim3/circuits.html
 original circuit and results are in ./orig
 esimated andf confirmed simulation results are in ./golden
-simulation script, circuit file are comprt-l2, compprt-l2.gckt
+simulation script, circuit file are comprt-l2, comprt-l2.gckt
 
 important for comparator - have reltol=0.1
 
+comprt-l1/ comprt-l1.gckt - simulation w/o FET charge caclulation
+.
