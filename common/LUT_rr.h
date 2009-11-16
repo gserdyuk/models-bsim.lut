@@ -60,29 +60,46 @@ double x[3];
 int LUT_Init (LUT3D_rr *lut, int NVals, double xmin, double xmax, int xsize, double ymin, double ymax, int ysize, double zmin, double zmax, int zsize);
 /* returns sucess code */
 int LUT_Destroy(LUT3D_rr *lut);
+
 /* returns number of node at axis a, which is lower than x, -1 if lower than a.minval, -2 if higher than a.maxval */
 int LUT_AxisSearch(LUT_Axis a, double x);
+#define LUT_AxisSearchD(a,x)   ( (int)( floor( ((x)-(a).minval)/a.dx ) ) )
+/* D - "define" version fo the function, if both are kept */
+
+
 /* 1 if belongs, -1 if lower, -2 if higher */
 int LUT_AxisBelongs(LUT_Axis a, double x); 
 
-double LUT_AxisValue(LUT_Axis a, int i);
+/* double LUT_AxisValue(LUT_Axis a, int i); */
+#define LUT_AxisValue(a,i) ( (a).minval+(i)*(a).dx )
 
-int LUT_NValues(LUT3D_rr *lut);
+/*int LUT_NValues(LUT3D_rr *lut);*/
+#define LUT_NValues(lut) ((lut)->NValues)
+
+
+int LUT_Index(LUT3D_rr *lut, int x, int y, int z);
+#define LUT_IndexD(lut, a, b, c) ( (a) + ( (lut)->x[0].size)*(b) + ((lut)->x[0].size)* ((lut)->x[1].size)*(c) )
 
 /*adds val to point x-y-z */
 int LUT_AddVal (LUT3D_rr *lut, int x, int y, int z, double val[/*lut->NValues*/]);
 /* returns value for x-y-z point */
 int LUT_GetValue(LUT3D_rr *lut, int x, int y, int z, double val[/*lut->NValues*/]);
+int LUT_GetValueP(LUT3D_rr *lut, int x, int y, int z, double** val);
+#define LUT_GetValuePD(lut, a, b, c, val) ( (*val) = (lut)->grid+ ( (a) + ( (lut)->x[0].size)*(b) + ((lut)->x[0].size)* ((lut)->x[1].size)*(c) ) *((lut)->NValues) ) 
+/* 
+P - pointer version of teh function 
+PD - pointer-define version fo teh function 
+*/    
 
 int  LUT_isFilled (LUT3D_rr *lut, int x, int y, int z);
-
+#define  LUT_isFilledD(lut, a, b, c) ( (lut)->filled[ ( (a) + ( (lut)->x[0].size)*(b) + ((lut)->x[0].size)* ((lut)->x[1].size)*(c) ) ] )
+ 
 /* high-level operations */
 
 int LUT_GetNode(LUT3D_rr *lut, double x, double y, double z, IntNode3D *n);
 
-int LUT_Interpolate(LUT3D_rr *lut, double x, double y, double z, double val[/*lut->NValues*/]);
 
-int fills_counter(LUT3D_rr *lut);    
-int interpolates_counter(LUT3D_rr *lut);
+int LUT_Interpolate(LUT3D_rr *lut, double x, double y, double z, double val[/*lut->NValues*/]);
+int LUT_InterpolateP(LUT3D_rr *lut, double x, double y, double z, double val[/*lut->NValues*/]);
 
 #endif

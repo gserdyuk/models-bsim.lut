@@ -1,0 +1,61 @@
+#!/bin/bash
+
+echo "20 run - timing_test" > 20run.out
+
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+./timing_test >> 20run.out
+
+echo "20 run - timing_test.lut" >> 20run.out
+
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+./timing_test.lut >> 20run.out
+
+cat 20run.out |head -n 21 |tail -n 20 |gawk ' {a+=$1;} END {print ("average norm",a/20);} ' >>20run.out
+cat 20run.out             |tail -n 20 |gawk ' {a+=$1;} END {print ("average lut" ,a/20);} ' >>20run.out
+
+cat 20run.out| tail -n 2| gawk ' /norm/ {an=$3;} /lut/ {al=$3;} END {print "lut/norm=",al/an;}' >>20run.out
+
+cat 20run.out |tail -n 1
+echo OK

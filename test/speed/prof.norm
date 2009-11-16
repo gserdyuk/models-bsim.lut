@@ -1,0 +1,4 @@
+#!/bin/bash
+
+valgrind --tool=callgrind -v --dump-line=yes --trace-jump=yes  --base=output-norm.out --collect-systime=yes ./timing_test
+

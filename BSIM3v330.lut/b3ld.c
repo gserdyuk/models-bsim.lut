@@ -200,22 +200,15 @@ double mineps=1.e-18;
 */
 
 #endif
-static int count=0;
-#undef SERIALIZATION
 #ifdef SERIALIZATION
 // serialization
 BSIM3model *model1 = (BSIM3model*)inModel;
+static int count=0;
 static FILE *inlogfile=NULL, *outlogfile=NULL;
 int i;
 int print_ckt( FILE* logfile, int count, CKTcircuit *ckt, char* message);
-#ifndef P9
 char inname[]="inlogfile.lut.txt";
 char outname[]="outlogfile.lut.txt";
-#else
-lut_check_accuracy=1;
-char inname[]="inlogfile.p9.txt";
-char outname[]="outlogfile.p9.txt";
-#endif
 /*
 if (inlogfile == NULL){
     inlogfile =fopen(inname,"wa");
@@ -255,7 +248,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
             }
         if (here->BSIM3lut_mode==1 || here->BSIM3lut_mode>=2) 
             ChargeComputationNeeded = 0; 
-        // fprintf(stdout,"Initialization \n");   
 #endif
 	  pParam = here->pParam;
           if ((ckt->CKTmode & MODEINITSMSIG))
@@ -484,15 +476,11 @@ for (; model != NULL; model = model->BSIM3nextModel)
       vgs_orig=vgs;
       vds_orig=vds;
       
-      ///fprintf(stdout," count %d  ### BSIM3ld - entered- storing: vbs_orig, vgs_orig, vds_orig = %%e %e %e  \n", count, vbs_orig, vgs_orig, vds_orig);
-      // fprintf(stdout," BSIM3lut_mode = %d \n", here->BSIM3lut_mode);
       if (here->BSIM3lut_mode==0 ||  here->BSIM3lut_mode==1){ /* no lut asked */
         lut_bypass=TRUE;
-        // fprintf(stdout," ### lut_bypass branch 1: \n");
         }
       else {
         ret=LUT_GetNode(here->lutptr, vbs, vgs, vds, &node);   /* x -> vbs  y->vgs  z->vgs */
-        // fprintf(stdout," ### LUT_GetNode ret: %d  \n", ret);
         if (ret<0)     /* lut asked, but point is out of range - so exact calculation - bypass LUT interpolation*/
             lut_bypass=TRUE;           
         else
@@ -501,10 +489,7 @@ for (; model != NULL; model = model->BSIM3nextModel)
       
       if(here->BSIM3lut_mode==3)
         lut_check_accuracy=1;
-        
-      
-      // fprintf(stdout," BSIM3load lut_bypass = %d \n", lut_bypass);
-            
+              
       /* here we have the following situations
          lut_mode = 0 - no lut asked, just plain model calculation
          lut_mode = 1 - lut model not needed, but capacitances not calculated
@@ -541,7 +526,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
         }
         
       for (i_corner=0; i_corner<NMAX; i_corner++){
-         // fprintf(stdout," point:  i_corner= %d \n", i_corner);
   
         if ( i_corner<NCORNERS && !lut_bypass ) {   /* filling corners of the cube */
             jx=ixa[i_corner];
@@ -558,10 +542,8 @@ for (; model != NULL; model = model->BSIM3nextModel)
         }
         /* now known vbs, vgs, vds */
       
-       ///fprintf(stdout," vbs, vgs, vds  %e %e %e \n", vbs, vgs, vds);
-        if ( lut_bypass || i_corner==NCORNERS || (! LUT_isFilled(here->lutptr,jx,jy,jz) )  ){ /* bypass_interpolation or fill corner or run 9-th calculation to check accuracy */
+        if ( lut_bypass || i_corner==NCORNERS || (! LUT_isFilledD(here->lutptr,jx,jy,jz) )  ){ /* bypass_interpolation or fill corner or run 9-th calculation to check accuracy */
             cnt++;
-       ///fprintf(stdout," entering main code \n");
 
             /*... continue regular model code */
 #endif
@@ -643,7 +625,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
           }
           /* End of diode DC model */
 
-    ///fprintf(stdout," ## ## ## vds = %e - normal or inverse\n",vds);
           if (vds >= 0.0)
 	  {   /* normal mode */
               here->BSIM3mode = 1;
@@ -658,7 +639,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
               Vgs = vgd;
               Vbs = vbd;
           }
-    ///fprintf(stdout," ## ## ## here->BSIM3mode = %d - normal or inverse\n",here->BSIM3mode);
 
 	  T0 = Vbs - pParam->BSIM3vbsc - 0.001;
 	  T1 = sqrt(T0 * T0 - 0.004 * pParam->BSIM3vbsc);
@@ -731,7 +711,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
           }
 
           here->BSIM3thetavth = pParam->BSIM3dvt0 * Theta0;
-          ///fprintf(stdout,"count= %d here->BSIM3thetavth = pParam->BSIM3dvt0 * Theta0;  %e = %e * %e \n", count, here->BSIM3thetavth, pParam->BSIM3dvt0, Theta0);
           Delt_vth = here->BSIM3thetavth * V0;
           dDelt_vth_dVb = pParam->BSIM3dvt0 * dTheta0_dVb * V0;
 
@@ -1010,7 +989,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
 	  }
 
           here->BSIM3ueff = ueff = pParam->BSIM3u0temp / Denomi;
-          ///fprintf(stdout,"count= %d here->BSIM3ueff = ueff = pParam->BSIM3u0temp / Denomi  %e = %e = %e / %e \n", count, here->BSIM3ueff, ueff, pParam->BSIM3u0temp, Denomi);
 	  T9 = -ueff / Denomi;
           dueff_dVg = T9 * dDenomi_dVg;
           dueff_dVd = T9 * dDenomi_dVd;
@@ -1405,8 +1383,8 @@ for (; model != NULL; model = model->BSIM3nextModel)
           }
          
           cdrain = Ids;
-          here->BSIM3gds  = Gds;
-          here->BSIM3gm   = Gm;
+          here->BSIM3gds = Gds;
+          here->BSIM3gm = Gm;
           here->BSIM3gmbs = Gmb;
                    
           here->BSIM3gbbs = Gbb;
@@ -1423,10 +1401,8 @@ for (; model != NULL; model = model->BSIM3nextModel)
     - interpolate, fill here->BSIMgds... , then allow "go to finished"
     NOTE: (!ChargeComputationNeeded) - we ignoring charges so far    
     */
-      // fprintf(stdout, "GOINT TO PROCESS:: Ids= %e \n", Ids);
-
       if ( ! lut_bypass) {
-      if ( ! LUT_isFilled(here->lutptr,jx,jy,jz) ) { // store values 
+      if ( ! LUT_isFilledD(here->lutptr,jx,jy,jz) ) { // store values 
         val[0] =Ids;
         val[1] =Gds;
         val[2] =Gm;
@@ -1445,8 +1421,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
         //val[13]=(double)here->BSIM3mode;
         
         LUT_AddVal(here->lutptr, jx,jy,jz, val);
-        // fprintf(stdout, "STORE: Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub = %e %e %e %e %e \n %e %e %e \n", Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub);
-        // fprintf(stdout, "STORE: gbs cbs gbd cbd von mode=  %e %e %e %e %e %d \n", here->BSIM3gbs,here->BSIM3cbs,here->BSIM3gbd,here->BSIM3cbd,here->BSIM3von,here->BSIM3mode);
       }
       else if (i_corner==NCORNERS) /* (last pass - store values to check accuracy) */{
         Ids_orig  = Ids;
@@ -1464,9 +1438,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
         BSIM3von_orig = here->BSIM3von;
         BSIM3mode_orig= here->BSIM3mode;
 
-        // fprintf(stdout, "CHECKPOINT: Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub = %e %e %e %e %e \n %e %e %e \n", Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub);
-        // fprintf(stdout, "CHECKPOINT: gbs cbs gbd cbd von mode=  %e %e %e %e %e %d \n", here->BSIM3gbs,here->BSIM3cbs,here->BSIM3gbd,here->BSIM3cbd,here->BSIM3von,here->BSIM3mode);
-
         }
         /* esle - just nothing - */
         }
@@ -1474,7 +1445,7 @@ for (; model != NULL; model = model->BSIM3nextModel)
     }   /*end for */
     
     if (! lut_bypass)  {
-        LUT_Interpolate(here->lutptr,vbs_orig,vgs_orig,vds_orig,vr);
+        LUT_InterpolateP(here->lutptr,vbs_orig,vgs_orig,vds_orig,vr);
     
         Ids = cdrain          = vr[0];
         Gds = here->BSIM3gds  = vr[1];
@@ -1522,29 +1493,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
         +* used after calculation, ok.
         +- not used in b3ld anymore
         
-        */
-        /*
-        fprintf(stdout, "INTERPOLATE: \n");
-        fprintf(stdout, " vr[0]/Ids  %g \n",vr[0]);
-        fprintf(stdout, " vr[1]/Gds  %g \n",vr[1]);
-        fprintf(stdout, " vr[2]/Gm   %g \n",vr[2]);
-        fprintf(stdout, " vr[3]/Gmb  %g \n",vr[3]);
-        fprintf(stdout, " vr[4]/Gbb  %g \n",vr[4]);
-        fprintf(stdout, " vr[5]/Gbg  %g \n",vr[5]);
-        fprintf(stdout, " vr[6]/Gbd  %g \n",vr[6]);
-        fprintf(stdout, " vr[7]/Isub %g \n",vr[7]);
-        fprintf(stdout, " vr[8]/gbs %g \n",vr[8]);
-        fprintf(stdout, " vr[9]/cbs %g \n",vr[9]);
-        fprintf(stdout, " vr[10]/gbd %g \n",vr[10]);
-        fprintf(stdout, " vr[11]/cbd %g \n",vr[11]);
-        fprintf(stdout, " vr[12]/von %g \n",vr[12]);
-        // fprintf(stdout, " vr[13]/mode %d \n",(int)vr[13]);
-
-        */
-
-        // fprintf(stdout, "   point vbs_orig vgs_orig vds_orig %e %e %e\n", vbs_orig,vgs_orig,vds_orig);        
-        // fprintf(stdout, "INTERPOLATED: cdrain= %e \n", cdrain);        
-    
         if (lut_check_accuracy){  /* caclulate errors */
             diff0=(vr[0]-Ids_orig);  rd0=diff0/fmax(fabs(Ids_orig), mineps) ;
             diff1=(vr[1]-Gds_orig);  rd1=diff1/fmax(fabs(Gds_orig), mineps);
@@ -1555,7 +1503,7 @@ for (; model != NULL; model = model->BSIM3nextModel)
             diff6=(vr[6]-Gbd_orig);  rd6=diff6/fmax(fabs(Gbd_orig), mineps);
             diff7=(vr[7]-Isub_orig); rd7=diff7/fmax(fabs(Isub_orig), mineps);
         
-            /*  
+            /*  output is not elaborated
             fprintf(stdout, " vr[0],Ids_orig  %g %g\n",vr[0],Ids_orig);
             fprintf(stdout, " vr[1],Gds_orig  %g %g\n",vr[1],Gds_orig);
             fprintf(stdout, " vr[2],Gm_orig   %g %g\n",vr[2],Gm_orig);
@@ -1571,9 +1519,6 @@ for (; model != NULL; model = model->BSIM3nextModel)
         }    
     }
     
-    ///fprintf(stdout, "COMPUTED: Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub = %e %e %e %e %e \n            %e %e %e \n", Ids, Gds, Gm, Gmb, Gbb, Gbg, Gbd, Isub);
-    ///fprintf(stdout, "COMPUTED: gbs cbs gbd cbd von mode=  %e %e %e %e %e %d \n", here->BSIM3gbs,here->BSIM3cbs,here->BSIM3gbd,here->BSIM3cbd,here->BSIM3von,here->BSIM3mode);
-
 #endif
 
           /* BSIM3 thermal noise Qinv calculated from all capMod 
@@ -3217,9 +3162,6 @@ line900:
               cdreq = model->BSIM3type * (cdrain - here->BSIM3gds * vds
 		    - Gm * vgs - Gmbs * vbs);
 
-              ///fprintf(stdout, "mode>=0: cdreq = model->BSIM3type * (cdrain + here->BSIM3gds * vds - Gm * vgs - Gmbs * vbs) \n %e =   %d * (%e + %e * %e - %e * %e - %e * %e)", 
-              ///                          cdreq, model->BSIM3type, cdrain, here->BSIM3gds, vds, Gm, vgs, Gmbs, vbs);
-
               ceqbd = -model->BSIM3type * (here->BSIM3csub 
 		    - here->BSIM3gbds * vds - here->BSIM3gbgs * vgs
 		    - here->BSIM3gbbs * vbs);
@@ -3245,10 +3187,7 @@ line900:
               RevSum = -(Gm + Gmbs);
               cdreq = -model->BSIM3type * (cdrain + here->BSIM3gds * vds
                     + Gm * vgd + Gmbs * vbd);
- 
-              ///fprintf(stdout, "mode<0: cdreq = -model->BSIM3type * (cdrain + here->BSIM3gds * vds+ Gm * vgd + Gmbs * vbd) \n %e = - %d * (%e + %e * %e + %e * %e + %e * %e)", 
-              ///                        cdreq, model->BSIM3type, cdrain,  here->BSIM3gds,  vds, Gm,  vgd, Gmbs,  vbd);
-              
+
               ceqbs = -model->BSIM3type * (here->BSIM3csub 
 		    + here->BSIM3gbds * vds - here->BSIM3gbgs * vgd
 		    - here->BSIM3gbbs * vbd);
@@ -3289,21 +3228,11 @@ line900:
                cqcheq = -cqcheq;
 	   }
 
-           ///fprintf(stdout, "CKTrhs WAS: (*(ckt->CKTrhs + here->BSIM3dNodePrime [%d] ) += (ceqbd - cdreq - ceqqd)): \n %e = %e %e %e \n",
-           ///                 here->BSIM3dNodePrime, *(ckt->CKTrhs + here->BSIM3dNodePrime), ceqbd, cdreq, ceqqd );
-  
-           ///fprintf(stdout, "CKTrhs WAS: (*(ckt->CKTrhs + here->BSIM3sNodePrime [%d] ) += (cdreq + ceqbs + ceqqg + ceqqb + ceqqd)): \n %e = %e %e %e %e %e\n",
-           ///                 here->BSIM3sNodePrime, *(ckt->CKTrhs + here->BSIM3sNodePrime), cdreq, ceqbs, ceqqg, ceqqb, ceqqd);
-
            (*(ckt->CKTrhs + here->BSIM3gNode) -= ceqqg);
            (*(ckt->CKTrhs + here->BSIM3bNode) -=(ceqbs + ceqbd + ceqqb));
            (*(ckt->CKTrhs + here->BSIM3dNodePrime) += (ceqbd - cdreq - ceqqd));
            (*(ckt->CKTrhs + here->BSIM3sNodePrime) += (cdreq + ceqbs + ceqqg
 						    + ceqqb + ceqqd));
-           
-           ///fprintf(stdout, "CKTrhs AFTER: (*(ckt->CKTrhs + here->BSIM3dNodePrime [%d] ) = %e\n",  here->BSIM3dNodePrime, *(ckt->CKTrhs + here->BSIM3dNodePrime));
-           ///fprintf(stdout, "CKTrhs AFTER: (*(ckt->CKTrhs + here->BSIM3sNodePrime [%d] ) = %e\n",  here->BSIM3sNodePrime, *(ckt->CKTrhs + here->BSIM3sNodePrime));
-           
            if (here->BSIM3nqsMod)
            *(ckt->CKTrhs + here->BSIM3qNode) += (cqcheq - cqdef);
 

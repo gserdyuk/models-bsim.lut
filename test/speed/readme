@@ -1,1 +1,16 @@
-this test compares sped of execution of regular BSIM code and LUT code
+this test compares speed of execution of regular BSIM code and LUT code
+
+method:
+1) read / create reasonable ckt and model objects
+2) execute b3load N times (standard/ nocap/ lut)
+3) measure time, calculate average
+
+NB. if BSIM3tnom==0 execution time increases SIGNIFICATLY (60 times) due to interruptions "div by zero"
+
+optimization made, most functions in LUT_rr.cc were substituted with #define
+now speed up is ~ 40 % ( lut time is 40% less than normal time)
+
+to make test:
+>make 
+>20run
+

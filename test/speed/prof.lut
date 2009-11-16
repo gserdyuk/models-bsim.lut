@@ -1,0 +1,5 @@
+#!/bin/bash
+
+valgrind --tool=callgrind -v --dump-line=yes --trace-jump=yes --base=output-lut-def.out --collect-systime=yes ./timing_test.lut
+
+

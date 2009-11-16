@@ -100,14 +100,11 @@ int LUT_AxisSearch(LUT_Axis a, double x){
         return -2;
     assert(LUT_AxisBelongs(a,x)==1);
     n= (int)( floor( (x-a.minval)/a.dx ) );
-    
-    /*fprintf(stdout, " ** LUT_AxisValue(a,n) LUT_AxisValue(a,n+1) x  x-LUT_AxisValue(a,n) %e %e %e %e\n", LUT_AxisValue(a,n), LUT_AxisValue(a,n+1), x, x-LUT_AxisValue(a,n) );
-    */
     assert( LUT_AxisValue(a,n)  -mineps <= x);
-    assert( LUT_AxisValue(a,n+1)+mineps >  x);    
-    
+    assert( LUT_AxisValue(a,n+1)+mineps >  x);        
     return n;
 }
+
 
 /* 1 if belongs, -1 if lower, -2 if higher */
 int LUT_AxisBelongs(LUT_Axis a, double x){
@@ -118,12 +115,14 @@ int LUT_AxisBelongs(LUT_Axis a, double x){
     return 1;
 } 
 
+/*
 double LUT_AxisValue(LUT_Axis a, int i){
     double v;
     assert(i<a.size);
     v = a.minval+i*a.dx;
     return v;
 }
+*/
 
 /* returns array index value for x-y-z point */
 int LUT_Index(LUT3D_rr *lut, int x, int y, int z){
@@ -133,39 +132,43 @@ int LUT_Index(LUT3D_rr *lut, int x, int y, int z){
     return (x + (lut->x[0].size)*y + (lut->x[0].size)* (lut->x[1].size)*z);
 }
 
+/*
 int LUT_NValues(LUT3D_rr *lut){
     return lut->NValues;
 }
-
+*/
 
 int LUT_AddVal (LUT3D_rr *lut, int x, int y, int z, double val[/*lut->NValues*/]){
     int i;
-    memcpy(lut->grid+LUT_Index(lut,x,y,z)*LUT_NValues(lut), val,sizeof(double)*lut->NValues);
-    lut->filled[LUT_Index(lut,x,y,z)]=TRUE;
+    memcpy(lut->grid+LUT_IndexD(lut,x,y,z)*lut->NValues, val,sizeof(double)*lut->NValues);
+    lut->filled[LUT_IndexD(lut,x,y,z)]=TRUE;
     lut->fills_count++;
     return 1;
 }
 
-
 int LUT_GetValue(LUT3D_rr *lut, int x, int y, int z, double val[/*lut->NValues*/]){
     int i;
-    memcpy(val, lut->grid+LUT_Index(lut,x,y,z)*LUT_NValues(lut),sizeof(double)*lut->NValues); 
+    memcpy(val, lut->grid+LUT_IndexD(lut,x,y,z)*LUT_NValues(lut),sizeof(double)*lut->NValues); 
+    return 1;
+}
+
+int LUT_GetValueP(LUT3D_rr *lut, int x, int y, int z, double** val){
+    (*val) = lut->grid+LUT_IndexD(lut,x,y,z)*LUT_NValues(lut); 
     return 1;
 }
 
 int  LUT_isFilled (LUT3D_rr *lut, int x, int y, int z){
-    int n=LUT_Index(lut,x,y,z);
-    return lut->filled[LUT_Index(lut,x,y,z)];
+    return lut->filled[LUT_IndexD(lut,x,y,z)];
 }
 
-/* high-level operations */
 
+/* high-level operations */
 int LUT_GetNode(LUT3D_rr *lut, double x, double y, double z, IntNode3D *n){
     int ix,iy,iz;
     ///printf(" LUT_GetNode - x,y,z %e %e %e \n",x,y,z);
-    ix=LUT_AxisSearch(lut->x[0],x);
-    iy=LUT_AxisSearch(lut->x[1],y);
-    iz=LUT_AxisSearch(lut->x[2],z);
+    ix=LUT_AxisSearchD(lut->x[0],x);
+    iy=LUT_AxisSearchD(lut->x[1],y);
+    iz=LUT_AxisSearchD(lut->x[2],z);
     
     n->x[0]=n->x[1]=n->x[2]=0;
     
@@ -189,9 +192,6 @@ int LUT_Interpolate(LUT3D_rr *lut, double x, double y, double z, double val[/*lu
     IntNode3D n;
     double v000[lut->NValues], v100[lut->NValues], v010[lut->NValues], v110[lut->NValues], v001[lut->NValues], 
            v101[lut->NValues], v011[lut->NValues], v111[lut->NValues];
-    double a000, a100, a010, a110, a001, a101, a011, a111;
-    double b000, b100, b010, b110, b001, b101, b011, b111;
-    double axyz, bxyz;
     double dx, dy, dz, mdx, mdy, mdz;
     
     /*ix,iy,iz are known, may be just pass them in */
@@ -234,19 +234,86 @@ int LUT_Interpolate(LUT3D_rr *lut, double x, double y, double z, double val[/*lu
     mdx=1.-dx;                     /* corresponds to "1-x" in Bourke formula*/
     mdy=1.-dy;
     mdz=1.-dz;
+    
+    for ( i=0; i<lut->NValues; i++){  /*LUTVALS - number of doubles stored in Value */   
+    /* interpolate */
+    val[i] =v000[i] * mdx *  mdy * mdz +
+            v100[i] *  dx *  mdy * mdz +
+            v010[i] * mdx *   dy * mdz +
+            v110[i] *  dx *   dy * mdz + 
+            v001[i] * mdx *  mdy *  dz +    
+            v101[i] *  dx *  mdy *  dz +
+            v011[i] * mdx *   dy *  dz +
+            v111[i] *  dx *  dy  *  dz ;
+    }
+    
+    lut->interpolates_count++;
+    
+    return 1;
+}
 
+int LUT_InterpolateP(LUT3D_rr *lut, double x, double y, double z, double val[/*lut->NValues*/]){
+/*interpolates by 8 points. all 8 points have to be filled */
+    /*
+    point is covered (Belongs)
+    surrounding points filled
+    */
+    int ix,iy,iz, i;
+    IntNode3D n;
+    double * v000, *v100, *v010, *v110, *v001, *v101, *v011, *v111;
+    double   k000,  k100,  k010,  k110,  k001,  k101,  k011,  k111;
+    double dx, dy, dz, mdx, mdy, mdz;
+    
+    /*ix,iy,iz are known, may be just pass them in */
+    if (LUT_GetNode(lut,x,y,z,&n) <0){
+        assert(1);
+        }
+        
+    ix=n.x[0];
+    iy=n.x[1];
+    iz=n.x[2];
+
+    LUT_GetValuePD(lut,ix,     iy,     iz,   &v000);
+    LUT_GetValuePD(lut,ix+1,   iy,     iz,   &v100); 
+    LUT_GetValuePD(lut,ix,     iy+1,   iz,   &v010);
+    LUT_GetValuePD(lut,ix+1,   iy+1,   iz,   &v110);
+    LUT_GetValuePD(lut,ix,     iy,     iz+1, &v001);
+    LUT_GetValuePD(lut,ix+1,   iy,     iz+1, &v101);
+    LUT_GetValuePD(lut,ix,     iy+1,   iz+1, &v011);
+    LUT_GetValuePD(lut,ix+1,   iy+1,   iz+1, &v111);
+
+   /* calculate some aux variables. */
+   /* corresponds to "x" in Bourke formula*/  
+
+    dx=(x-LUT_AxisValue(lut->x[0],ix))/ lut->x[0].dx;  
+    dy=(y-LUT_AxisValue(lut->x[1],iy))/ lut->x[1].dx;
+    dz=(z-LUT_AxisValue(lut->x[2],iz))/ lut->x[2].dx;
+
+    mdx=1.-dx;                     /* corresponds to "1-x" in Bourke formula*/
+    mdy=1.-dy;
+    mdz=1.-dz;
+
+    k000 = mdx *  mdy * mdz ;
+    k100 =  dx *  mdy * mdz ;
+    k010 = mdx *   dy * mdz ;
+    k110 =  dx *   dy * mdz ; 
+    k001 = mdx *  mdy *  dz ;
+    k101 =  dx *  mdy *  dz ;
+    k011 = mdx *   dy *  dz ;
+    k111 =  dx *  dy  *  dz ;
 
     for ( i=0; i<lut->NValues; i++){  /*LUTVALS - number of doubles stored in Value */   
     /* interpolate */
-    val[i] = 	v000[i] * mdx *  mdy * mdz +
-            v100[i] *  dx *  mdy * mdz +
-            v010[i] * mdx *   dy * mdz +
-            v001[i] * mdx *  mdy *  dz +
-            v101[i] *  dx *  mdy *  dz +
-            v011[i] * mdx *   dy *  dz +
-            v110[i] *  dx *   dy * mdz +
-            v111[i] *  dx *  dy  *  dz ;
+    val[i] =v000[i] * k000 +
+            v100[i] * k100 +
+            v010[i] * k010 +
+            v110[i] * k110 + 
+            v001[i] * k001 +
+            v101[i] * k101 +
+            v011[i] * k011 +
+            v111[i] * k111 ;
     }
+
     
     lut->interpolates_count++;
     

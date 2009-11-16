@@ -816,7 +816,7 @@ printf("create_BSIM3model: sizeof(BSIM3instance)= %i\n", sizeof(BSIM3instance));
 printf("create_BSIM3model: (*model) = %X \n", (*model));
 printf("create_BSIM3model: (*model)->BSIM3instances = %X \n",(*model)->BSIM3instances);
 */
-here=(*model)->BSIM3instances;;
+here=(*model)->BSIM3instances;
 
 //printf("create_BSIM3model: here = %X \n", here);
 
@@ -856,6 +856,12 @@ here->pParam = (struct bsim3SizeDependParam *)malloc (sizeof(struct bsim3SizeDep
 (here->BSIM3GqPtr)  =(double*)malloc(sizeof(double));
 (here->BSIM3SPqPtr) =(double*)malloc(sizeof(double));
 (here->BSIM3BqPtr)  =(double*)malloc(sizeof(double));
+
+#ifdef LUT
+here->lutptr=malloc(sizeof (LUT3D_rr)); 
+here->lut_inited=0; /* FALSE */
+here->BSIM3lut_mode=0;   /* no lut by default */
+#endif /*LUT*/
 
 }
 
@@ -899,6 +905,10 @@ free(here->BSIM3DPqPtr) ;
 free(here->BSIM3GqPtr)  ;
 free(here->BSIM3SPqPtr) ;
 free(here->BSIM3BqPtr)  ;
+
+#ifdef LUT
+free(here->lutptr)      ;
+#endif
 
 free (here);
 free (*model);
@@ -1687,4 +1697,25 @@ ret=fscanf(logfile,"        double BSIM3lintnoi		= %le \n", &model->BSIM3lintnoi
 //??
 ret=fscanf(logfile,"  == model end \n");   CHECK(0); 
 return 1;
+}
+
+int BSIM3_set_lut(BSIM3model *model, int lut){
+    BSIM3instance *here;
+#ifdef LUT
+    model->BSIM3vgsmin = -5.;
+    model->BSIM3vgsmax = +5.;
+    model->BSIM3vgsnum = 20;
+    model->BSIM3vdsmin = -5.;
+    model->BSIM3vdsmax = +5.;
+    model->BSIM3vdsnum = 20;
+    model->BSIM3vbsmin = -5.;
+    model->BSIM3vbsmax = +5.;
+    model->BSIM3vbsnum = 20;
+#endif             
+    
+    here=model->BSIM3instances;
+#ifdef LUT
+    here->BSIM3lut_mode=lut;  
+#endif /*LUT*/
+    return 1;
 }
