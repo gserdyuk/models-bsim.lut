@@ -1,9 +1,10 @@
 BSIM with Look-Up Table (LUT)
+BSIM LUT speedup
 G. Serdyuk <gena@analograils.com>
  
 1. Intro
 --------
-[tbd]
+Idea is straighforward - substitute part of calculations with Look-Up Table.
 
 2. Installation
 ---------------
@@ -11,11 +12,15 @@ G. Serdyuk <gena@analograils.com>
 gnucap
     src
     ...
+    models-bsim (optional)
     models-bsim.lut
+    
 - cd BSIM3v330.lut
+
 - make
 
-bsim330.lut.so  library will be created. Use it as usual
+bsim330.lut.so  library will be created. Use it as usual (gnucap -a bsim330.lut.so .... 
+or .attach bsim330.lut.so)
 
 2.1.Developers version
 ---------------------
@@ -55,6 +60,7 @@ lut_mode = 0 1 or 2
 0 - full BSIM model
 1 - BSIM model w/o change calculation
 3 - LUT used
+4 - LUT with precision monitoring (output is not elaborated)
 
 4. ToDO
 -------
@@ -62,18 +68,21 @@ lut_mode = 0 1 or 2
 1) clean up code and makefile
    + clean printf-s			done
    + use gnucap/spice-wrapper.cc	done
-   - remove extra lines in main code
+   - remove extra lines in main code	done
    + use standard Makefile		done
    
 2) finish test cases
     - tran
 	+ comprt
-	...
+	TBD
     - dc
-	...
+	TBD
     - time comparison
+	+ speed  			done 
+	(many subsequent calls of b3load)
 	...
-3) combine multiple LUTs for same devices
-4) write doc
-5) optimize time
-6) check derivatives  
+3) combine multiple LUTs for same devices - 
+					TBD
+4) write doc				done
+5) optimize time			done (#define used)
+6) check derivatives  			TBD
