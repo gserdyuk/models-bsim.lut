@@ -1492,7 +1492,7 @@ for (; model != NULL; model = model->BSIM3nextModel)
         ++ means that are used before  being calculated - i.e. reused from previous call
         +* used after calculation, ok.
         +- not used in b3ld anymore
-        
+        */
         if (lut_check_accuracy){  /* caclulate errors */
             diff0=(vr[0]-Ids_orig);  rd0=diff0/fmax(fabs(Ids_orig), mineps) ;
             diff1=(vr[1]-Gds_orig);  rd1=diff1/fmax(fabs(Gds_orig), mineps);
